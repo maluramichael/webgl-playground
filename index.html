@@ -17,27 +17,26 @@
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
+    attribute vec2 aVertexPosition;
     attribute vec3 aVertexColor;
 
     varying vec3 vColor;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
+    uniform mat3 u_matrix;
 
     void main(void) {
-    gl_Position = vec4(aVertexPosition, 1.0);
+        gl_Position = vec4(u_matrix * vec3(aVertexPosition, 1.0), 1.0);
         vColor = aVertexColor;
     }
 </script>
 
 <canvas id="glcanvas" width="640" height="480">
-    Ihr Browser scheint das HTML5
-    <canvas> Element nicht zu unterstützen.
-    </canvas>
+    Ihr Browser scheint das HTML5 canvas Element nicht zu unterstützen.
+</canvas>
 
-    <script src="gl.js" charset="utf-8"></script>
-    <script src="scene.js" charset="utf-8"></script>
+<script src="helper.js" charset="utf-8"></script>
+<script src="gl.js" charset="utf-8"></script>
+<script src="scene.js" charset="utf-8"></script>
 </body>
 
 </html>

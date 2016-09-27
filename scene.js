@@ -5,6 +5,8 @@ var squareVerticesBuffer;
 var vertexPositionAttribute;
 var vertexColorAttribute;
 
+var worldMatrixUniformLocation;
+
 var shaderProgram;
 
 function initBuffers(gl) {
@@ -12,15 +14,15 @@ function initBuffers(gl) {
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
 
-	gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 6 * 4, 0);
-	gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 6 * 4, 3 * 4);
+	gl.vertexAttribPointer(vertexPositionAttribute, 2, gl.FLOAT, false, 5 * 4, 0);
+	gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 5 * 4, 2 * 4);
 
 	// x, y, z, r, g, b
 	const vertices = [
-		0.5, 0.5, 0.0, 1, 0, 1,
-		-0.5, 0.5, 0.0, 0, 0, 1,
-		0.5, -0.5, 0.0, 1, 1, 1,
-		-0.5, -0.5, 0.0, 0, 0, 0
+		1.0, 1.0, 1, 0, 0,
+		-1.0, 1.0, 0, 1, 0,
+		1.0, -1.0, 0, 0, 1,
+		-1.0, -1.0, 1, 1, 1
 	];
 
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -48,6 +50,8 @@ function loadShader(gl) {
 	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
 	vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
 
+	worldMatrixUniformLocation = gl.getUniformLocation(shaderProgram, "u_matrix");
+
 	gl.enableVertexAttribArray(vertexPositionAttribute);
 	gl.enableVertexAttribArray(vertexColorAttribute);
 
@@ -60,11 +64,34 @@ function engine_initialize(gl) {
 }
 
 function engine_render(gl) {
-	gl.clearColor(0, 0, 0, 1);
+	gl.clearColor(0.2, 0.2, 0.2, 1);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
 	gl.useProgram(shaderProgram);
+
+	// Compute the matrices
+	var translationMatrix = makeTranslation(0, 0);
+	var rotationMatrix = makeRotation(0);
+	var scaleMatrix = makeScale(0.1, 0.1);
+
+	console.log('translation');
+	printMatrix(translationMatrix);
+
+	console.log('rotation');
+	printMatrix(rotationMatrix);
+
+	console.log('scale');
+	printMatrix(scaleMatrix);
+
+	// Multiply the matrices.
+	var matrix = matrixMultiply(scaleMatrix, rotationMatrix);
+	matrix = matrixMultiply(matrix, translationMatrix);
+
+	console.log('matrix');
+	printMatrix(matrix);
+
+	gl.uniformMatrix3fv(worldMatrixUniformLocation, false, matrix);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
