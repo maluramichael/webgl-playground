@@ -14,15 +14,15 @@ function initBuffers(gl) {
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
 
-	gl.vertexAttribPointer(vertexPositionAttribute, 2, gl.FLOAT, false, 5 * 4, 0);
-	gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 5 * 4, 2 * 4);
+	gl.vertexAttribPointer(vertexPositionAttribute, 3, gl.FLOAT, false, 6 * 4, 0);
+	gl.vertexAttribPointer(vertexColorAttribute, 3, gl.FLOAT, false, 6 * 4, 3 * 4);
 
 	// x, y, z, r, g, b
-	const vertices = [
-		1.0, 1.0, 1, 0, 0,
-		-1.0, 1.0, 0, 1, 0,
-		1.0, -1.0, 0, 0, 1,
-		-1.0, -1.0, 1, 1, 1
+	var vertices = [
+		1.0, 1.0, 0.0, 1, 0, 0,
+		0.0, 1.0, 0.0, 0, 1, 0,
+		1.0, 0.0, 0.0, 0, 0, 1,
+		0.0, 0.0, 0.0, 1, 1, 1
 	];
 
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -47,7 +47,7 @@ function loadShader(gl) {
 
 	gl.useProgram(shaderProgram);
 
-	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+	vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "a_position");
 	vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
 
 	worldMatrixUniformLocation = gl.getUniformLocation(shaderProgram, "u_matrix");
@@ -58,12 +58,12 @@ function loadShader(gl) {
 	gl.useProgram(null);
 }
 
-function engine_initialize(gl) {
+function engine_initialize(gl, canvas) {
 	loadShader(gl);
 	initBuffers(gl);
 }
 
-function engine_render(gl) {
+function engine_render(gl, canvas) {
 	gl.clearColor(0.2, 0.2, 0.2, 1);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -71,9 +71,13 @@ function engine_render(gl) {
 	gl.useProgram(shaderProgram);
 
 	// Compute the matrices
-	var translationMatrix = makeTranslation(0, 0);
-	var rotationMatrix = makeRotation(0);
-	var scaleMatrix = makeScale(0.1, 0.1);
+	var projectionMatrix = make2DProjection(canvas.clientWidth, canvas.clientHeight, 400);
+	var translationMatrix = makeTranslation(0, 0, 0);
+	var rotationMatrix = makeZRotation(0);
+	var scaleMatrix = makeScale(100, 100, 1);
+
+	console.log('projection');
+	printMatrix(projectionMatrix);
 
 	console.log('translation');
 	printMatrix(translationMatrix);
@@ -87,11 +91,12 @@ function engine_render(gl) {
 	// Multiply the matrices.
 	var matrix = matrixMultiply(scaleMatrix, rotationMatrix);
 	matrix = matrixMultiply(matrix, translationMatrix);
+	matrix = matrixMultiply(matrix, projectionMatrix);
 
 	console.log('matrix');
 	printMatrix(matrix);
 
-	gl.uniformMatrix3fv(worldMatrixUniformLocation, false, matrix);
+	gl.uniformMatrix4fv(worldMatrixUniformLocation, false, matrix);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 

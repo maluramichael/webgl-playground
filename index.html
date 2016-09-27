@@ -17,15 +17,15 @@
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec2 aVertexPosition;
+    attribute vec4 a_position;
     attribute vec3 aVertexColor;
 
     varying vec3 vColor;
 
-    uniform mat3 u_matrix;
+    uniform mat4 u_matrix;
 
     void main(void) {
-        gl_Position = vec4(u_matrix * vec3(aVertexPosition, 1.0), 1.0);
+        gl_Position = u_matrix * a_position;
         vColor = aVertexColor;
     }
 </script>

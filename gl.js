@@ -67,6 +67,6 @@ function start(elementId, initialize, render) {
 
 	// Es geht nur weiter, wenn WebGl verfügbar ist.
 
-	initialize(gl);
-	render(gl);
+	initialize(gl, canvas);
+	render(gl, canvas);
 }
