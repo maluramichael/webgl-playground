@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+
+<body>
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec3 vColor;
+
+    void main(void) {
+        gl_FragColor = vec4(vColor, 1.0);
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexColor;
+
+    varying vec3 vColor;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+
+    void main(void) {
+    gl_Position = vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+    }
+</script>
+
+<canvas id="glcanvas" width="640" height="480">
+    Ihr Browser scheint das HTML5
+    <canvas> Element nicht zu unterstützen.
+    </canvas>
+
+    <script src="gl.js" charset="utf-8"></script>
+    <script src="scene.js" charset="utf-8"></script>
+</body>
+
+</html>
