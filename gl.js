@@ -59,7 +59,7 @@ function getShader(gl, id) {
 }
 
 
-function start(elementId, initialize, render) {
+function start(elementId, initialize, frame) {
 	var canvas = document.getElementById(elementId);
 
 	var gl = initWebGL(canvas);      // Initialisierung des WebGL Kontextes
@@ -68,5 +68,5 @@ function start(elementId, initialize, render) {
 	// Es geht nur weiter, wenn WebGl verfügbar ist.
 
 	initialize(gl, canvas);
-	render(gl, canvas);
+	frame(gl, canvas);
 }

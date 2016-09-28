@@ -8,6 +8,9 @@ var vertexColorAttribute;
 var worldMatrixUniformLocation;
 
 var shaderProgram;
+var projectionMatrix;
+
+var timestamp = new Date().getTime();
 
 function initBuffers(gl) {
 	squareVerticesBuffer = gl.createBuffer();
@@ -58,50 +61,59 @@ function loadShader(gl) {
 	gl.useProgram(null);
 }
 
-function engine_initialize(gl, canvas) {
-	loadShader(gl);
-	initBuffers(gl);
-}
-
-function engine_render(gl, canvas) {
-	gl.clearColor(0.2, 0.2, 0.2, 1);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
-	gl.useProgram(shaderProgram);
-
+function drawRect(gl, x, y, w, h) {
 	// Compute the matrices
-	var projectionMatrix = make2DProjection(canvas.clientWidth, canvas.clientHeight, 400);
-	var translationMatrix = makeTranslation(0, 0, 0);
-	var rotationMatrix = makeZRotation(0);
-	var scaleMatrix = makeScale(100, 100, 1);
-
-	console.log('projection');
-	printMatrix(projectionMatrix);
-
-	console.log('translation');
-	printMatrix(translationMatrix);
-
-	console.log('rotation');
-	printMatrix(rotationMatrix);
-
-	console.log('scale');
-	printMatrix(scaleMatrix);
+	var translationMatrix = makeTranslation(x, y, 0);
+	var rotationXMatrix = makeXRotation(0);
+	var rotationYMatrix = makeYRotation(0);
+	var rotationZMatrix = makeZRotation(0);
+	var scaleMatrix = makeScale(w, h, 1);
 
 	// Multiply the matrices.
-	var matrix = matrixMultiply(scaleMatrix, rotationMatrix);
+	var matrix = matrixMultiply(scaleMatrix, rotationXMatrix);
+	matrix = matrixMultiply(matrix, rotationYMatrix);
+	matrix = matrixMultiply(matrix, rotationZMatrix);
 	matrix = matrixMultiply(matrix, translationMatrix);
 	matrix = matrixMultiply(matrix, projectionMatrix);
-
-	console.log('matrix');
-	printMatrix(matrix);
 
 	gl.uniformMatrix4fv(worldMatrixUniformLocation, false, matrix);
 
 	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+function render(gl) {
+	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
+	gl.useProgram(shaderProgram);
+
+	drawRect(gl, 0, 0, 100, 100);
+	drawRect(gl, 200, 200, 100, 100);
 
 	gl.useProgram(null);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-start('glcanvas', engine_initialize, engine_render);
+function update(delta) {
+}
+
+function engine_initialize(gl, canvas) {
+	projectionMatrix = make2DProjection(canvas.clientWidth, canvas.clientHeight, 400);
+
+	loadShader(gl);
+	initBuffers(gl);
+}
+
+function engine_frame(gl, canvas) {
+	gl.clearColor(0.2, 0.2, 0.2, 1);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	var now = new Date().getTime();
+	var delta = now - timestamp;
+	timestamp = now;
+
+	update(delta);
+	render(gl);
+
+	requestAnimationFrame(engine_frame.bind(engine_frame, gl, canvas));
+}
+
+start('glcanvas', engine_initialize, engine_frame);
