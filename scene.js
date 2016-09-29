@@ -12,6 +12,8 @@ var projectionMatrix;
 
 var timestamp = new Date().getTime();
 
+var t = 0;
+
 function initBuffers(gl) {
 	squareVerticesBuffer = gl.createBuffer();
 
@@ -61,13 +63,13 @@ function loadShader(gl) {
 	gl.useProgram(null);
 }
 
-function drawRect(gl, x, y, w, h) {
+function drawRect(gl, x, y, w, h, rx, ry, rz) {
 	// Compute the matrices
-	var translationMatrix = makeTranslation(x, y, 0);
-	var rotationXMatrix = makeXRotation(0);
-	var rotationYMatrix = makeYRotation(0);
-	var rotationZMatrix = makeZRotation(0);
-	var scaleMatrix = makeScale(w, h, 1);
+	var translationMatrix = makeTranslation(x || 0, y || 0, 0);
+	var rotationXMatrix = makeXRotation(rx || 0);
+	var rotationYMatrix = makeYRotation(ry || 0);
+	var rotationZMatrix = makeZRotation(rz || 0);
+	var scaleMatrix = makeScale(w || 100, h || 100, 1);
 
 	// Multiply the matrices.
 	var matrix = matrixMultiply(scaleMatrix, rotationXMatrix);
@@ -85,14 +87,16 @@ function render(gl) {
 	gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBuffer);
 	gl.useProgram(shaderProgram);
 
-	drawRect(gl, 0, 0, 100, 100);
-	drawRect(gl, 200, 200, 100, 100);
+	drawRect(gl, 50 + (Math.cos(t) * 100), 50 + (Math.sin(t) * 100), 20, 20);
+	drawRect(gl, 200 + (Math.sin(t) * 100), 200, 100, 100);
+	drawRect(gl, 300, 350, 100, 100, 0, 0, t);
 
 	gl.useProgram(null);
 	gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
 function update(delta) {
+	t += 0.001 * delta;
 }
 
 function engine_initialize(gl, canvas) {
